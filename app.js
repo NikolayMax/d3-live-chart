@@ -56,34 +56,36 @@ svg.append('g')
 
 function prev(){
   xRange = [xRange[0]-10, xRange[1]-10];
-  xScale = d3.scaleLinear().domain(xRange).range([0, width - margin * 2]);
+  newxScale = d3.scaleLinear().domain(xRange).range([0, width - margin * 2]);
   
-  oldData.shift()
-  oldData = oldData.concat(data.filter(i => i.x >= xRange[0] && i.x < xRange[0]+10))
   
-  console.log(xRange, oldData);
- 
+  console.log(xRange, oldData, oldData.filter(i => i.x <= xRange[1]));
+  
+  oldData = oldData.filter(i => i.x <= xRange[1])
+                  .concat(data.filter(i => i.x >= xRange[0] && i.x < xRange[0]+10))
+  
+  
+   d3.select(".wrap-circle")
+     .selectAll("circle")
+    .data(oldData)
+    .enter()
+    .append("circle")
+    .attr("cx", d => xScale(d.x) - margin)
+    .attr("cy", d => yScale(d.y) + margin)
+    .style("fill", "#3c8dbc" )
+    .attr("r", 2)
+  
   
   d3.selectAll("circle")
     .data(oldData)
     .transition()
     .duration(1000)
-    .attr("cx", d => xScale(d.x) + margin)
+    .attr("cx", d => newxScale(d.x) + margin)
+    .attr("cy", d => yScale(d.y) + margin)
     .attr("myx", d => d.x)
     .attr("myy", d => d.y);
-  
-  
-  d3.selectAll('circle').data(oldData).exit().remove();
-  
-//   d3.selectAll("circle")
-//     .data(oldData)
-//     .enter()
-//     .attr("cx", d => xScale(d.x) + margin)
-//     .attr("cy", d => yScale(d.y) + margin)
-//     .transition()
-//     .duration(1000)
-//     .attr("cx", d => newxScale(d.x) + margin)
-//     .attr("cy", d => yScale(d.y) + margin);
+ xScale = newxScale;
+ 
   
   xAxis = d3.axisBottom(xScale);
   
